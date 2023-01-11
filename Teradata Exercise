@@ -1,0 +1,19 @@
+##Coursera – Duke University 
+##Excel to MySQL: Analytics Techniques for Business Specialization  
+##Managing Big Data with MySQL
+##Week 3 – Lesson 6 – Teradata Exercises
+
+## Exercise 1: (a) Use COUNT and DISTINCT to determine how many distinct skus there are in pairs of the skuinfo, skstinfo, and trnsact tables. Which skus are common to pairs of tables, or unique to specific tables?
+
+SELECT COUNT(DISTINCT sku)
+FROM skuinfo;
+#1564178
+
+SELECT COUNT(DISTINCT sku)
+FROM skstinfo;
+#760212
+
+SELECT COUNT (DISTINCT sku)
+FROM trnsact;
+#714449
+# number of distinct skus in skuinfo > number
