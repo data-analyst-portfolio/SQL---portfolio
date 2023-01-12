@@ -3,17 +3,183 @@
 ##Managing Big Data with MySQL
 ##Week 3 – Lesson 6 – Teradata Exercises
 
-## Exercise 1: (a) Use COUNT and DISTINCT to determine how many distinct skus there are in pairs of the skuinfo, skstinfo, and trnsact tables. Which skus are common to pairs of tables, or unique to specific tables?
+# Exercise 1: 
+#(a) Use COUNT and DISTINCT to determine how many distinct skus there are in pairs of the skuinfo, skstinfo, and trnsact tables. Which skus are common to pairs of tables, or unique to specific tables?
 
 SELECT COUNT(DISTINCT sku)
 FROM skuinfo;
+
 #1564178
 
 SELECT COUNT(DISTINCT sku)
 FROM skstinfo;
+
 #760212
 
 SELECT COUNT (DISTINCT sku)
 FROM trnsact;
+
 #714449
-# number of distinct skus in skuinfo > number
+# number of distinct skus in skuinfo > number of distinct skus in skstinfo > number of distinct skus in transact
+
+#(b) Use COUNT to determine how many instances there are of each sku associated with each store in the skstinfo table and the trnsact table?
+
+SELECT sku, store, COUNT(*)
+FROM skstinfo
+GROUP BY sku, store
+ORDER BY COUNT(*) DESC;
+
+#Each sku is only counted 1 time at each store
+
+SELECT sku, store, COUNT(*)
+FROM trnsact
+GROUP BY sku, store
+ORDER BY COUNT(*) DESC;
+
+#7933 is the MAX count of a any sku at any store
+
+#Exercise 2:
+#(Use COUNT and DISTINCT to determine how many distinct stores there are in the strinfo, store_msa, skstinfo, and trnsact tables.
+
+SELECT COUNT(DISTINCT store)
+FROM strinfo;
+
+#453 stores
+
+SELECT COUNT(DISTINCT store)
+FROM store_msa;
+
+#333 stores
+
+SELECT COUNT(DISTINCT store)
+FROM skstinfo;
+
+#357 stores
+
+SELECT COUNT(DISTINCT store)
+FROM trnsact;
+
+#332 stores
+
+#Exercise 3: 
+#Examine some of the rows in the trnsact table that are not in the skstinfo table; can you find any common features that could explain why the cost information is missing?
+
+SELECT trn.*
+FROM trnsact trn
+LEFT JOIN skstinfo skst
+ON trn.sku = skst.sku AND trn.store = skst.store
+WHERE skst.sku IS NULL;
+
+# total of 52338840
+
+#Exercise 4: 
+#What is Dillard’s average profit per day?
+
+SELECT (SUM((trn.sprice - skst.cost)* trn.quantity)/COUNT(DISTINCT saledate)) 
+FROM trnsact trn
+LEFT JOIN skstinfo skst
+ON trn.sku = skst.sku AND trn.store = skst.store
+WHERE trn.stype = 'P';
+
+#1527903.46
+
+# Exercise 5:
+# On what day was the total value (in $) of returned goods the greatest? 
+#On what day was the total number of individual returned items the greatest?
+
+SELECT saledate, SUM(amt)
+FROM trnsact
+WHERE stype = 'R'
+GROUP BY saledate
+ORDER BY SUM(amt) DESC;
+
+# 04/12/27  3030259.76
+
+SELECT saledate, SUM(quantity)
+FROM trnsact
+WHERE stype = 'R'
+GROUP BY saledate
+ORDER BY COUNT(amt) DESC;
+
+# 04/12/27  82512
+
+#Exercise 6:
+#What is the maximum price paid for an item in our database?
+# What is the minimum price paid for an item in our database?
+
+SELECT MAX(sprice), MIN(sprice)
+FROM trnsact
+WHERE stype = 'P';
+
+# MAX: 6017 	MIN: 0.00
+
+#Exercise 7:
+#How many departments have more than 100 brands associated with them, and what are their descriptions?
+
+SELECT dept.dept, COUNT(DISTINCT sku.brand) total, dept.deptdesc
+FROM SKUINFO sku
+JOIN DEPTINFO dept
+ON sku.dept = dept.dept
+GROUP BY dept.dept , dept.deptdesc
+HAVING total > 100;
+
+#3 departments – despcrtions: Environmental, Carters, Colehaan
+
+#Exercise 8:
+#Write a query that retrieves the department descriptions of each of the skus in the skstinfo table.
+
+SELECT sku.sku, dept.deptdesc
+FROM skstinfo skst
+LEFT JOIN SKUINFO sku
+ON skst.sku = sku.sku
+JOIN DEPTINFO dept
+ON sku.dept = dept.dept
+GROUP BY sku.sku , dept.deptdesc;
+
+#Exercise 9:
+#What department (with department description), brand, style, and color had the greatest total value of returned items?
+
+SELECT sku.dept, dept.deptdesc, sku.brand, sku.style, sku.color, SUM(trn.amt)
+FROM skuinfo sku
+JOIN trnsact trn
+ON sku.sku = trn.sku
+JOIN DEPTINFO dept
+ON dept.dept = sku.dept
+WHERE trn.stype = 'R'
+GROUP BY sku.dept, dept.deptdesc, sku.brand, sku.style, sku.color
+ORDER BY SUM(trn.amt) DESC;
+
+#4505 	POLOMEN	POLO FAS	4GZ 782633	U KHAKI	216633.59
+#7307	SIGRID O	NOBLE EX	HMANO 	ENGLIS	ROSE	202424.05
+#7307	SIGRID O	NOBLE EX	CHLOE		PETAL PINK	190183.61
+#7307	SIGRID O	NOBLE EX	3133		SAND		187096.67
+#2200	CELEBRT	LANCOME	1042		00-NONE	177142.50
+
+#Exercise 10:
+#In what state and zip code is the store that had the greatest total revenue during the time period #monitored in our dataset?
+
+SELECT str.store, str.city, str.zip, SUM(trn.amt)
+FROM trnsact trn
+JOIN strinfo str
+ON trn.store = str.store
+WHERE trn.stype = 'P'
+GROUP BY str.store, str.city, str.zip
+ORDER BY SUM(trn.amt) DESC;
+
+#8402	METAIRIE	70002	24171426.58
+#504	LITTLE ROCK	72205	22792579.65
+#2707	MCALLEN	78501	22331884.55
+#1607	DALLAS		75225	22063797.73
+#9103	LOUISVILLE	40207	20114154.20
+#7507	HOUSTON	77056	19040376.84
+
+
+
+
+
+
+
+
+
+
+
