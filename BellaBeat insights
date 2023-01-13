@@ -1,0 +1,103 @@
+##BellaBeat Data Analysis - Insights
+##Google Data Analytics Professional Certificate - Coursera
+##Capstone Project
+
+#Finding the aggregate MIN, MAX, and Averages for calories, steps, distance, minutes slept while diregarding final day of data where sample size was too small.
+
+SELECT AVG(Calories) AS avg_calories, 
+MAX(calories) AS max_calories, 
+MIN(calories) AS min_calories, 
+AVG(steps) AS avg_steps, 
+MAX(steps) AS max_steps,
+MIN(steps) AS min_steps, 
+AVG(distance) AS avg_distance, 
+MAX(distance) AS max_distance,
+MIN(distance) AS min_distance, 
+AVG(Sleep_mins) AS avg_sleep, 
+MAX(Sleep_mins) AS max_sleep,
+MIN(Sleep_mins) AS min_sleep, 
+ FROM `bellabeat-364607.data.daily_avg`
+ WHERE Date != "2016-05-12"
+  LIMIT 1000;
+  
+#Finding the average steps, distance, calories, and sleep for each user while joining two tables.
+
+SELECT
+  daily_activity.Id,
+  AVG(TotalSteps) AS steps,
+  AVG(TotalDistance) AS distance,
+  AVG(Calories) AS Calories,
+  AVG(TotalMinutesAsleep) AS Sleep_mins
+FROM
+  `bellabeat-364607.data.daily_activity` AS daily_activity
+LEFT JOIN
+  `bellabeat-364607.data.sleep` AS sleep
+ON
+  daily_activity.Id = sleep.Id AND daily_activity.Date = sleep.Date
+GROUP BY
+  daily_activity.Id
+ORDER BY
+  daily_activity.Id ASC
+LIMIT
+  1000;
+ 
+#Finding the average daily participants.
+ 
+ SELECT AVG(participants)
+FROM (
+  SELECT COUNT(*) AS participants
+ FROM `bellabeat-364607.data.daily_activity`
+ GROUP BY Date);
+ 
+ #Finding average steps, distance, calories, minutes slept for each day.
+ 
+ SELECT
+  daily_activity.DATE,
+  AVG(TotalSteps) AS steps,
+  AVG(TotalDistance) AS distance,
+  AVG(Calories) AS Calories,
+  AVG(TotalMinutesAsleep) AS Sleep_mins
+FROM
+  `bellabeat-364607.data.daily_activity` AS daily_activity
+LEFT JOIN
+  `bellabeat-364607.data.sleep` AS sleep
+ON
+  daily_activity.Id = sleep.Id AND daily_activity.Date = sleep.Date
+GROUP BY
+  daily_activity.DATE
+ORDER BY
+  daily_activity.DATE ASC
+LIMIT
+  1000;
+  
+ #Checking if there is any connection between the subjects weight and there avg steps, calories, and distance.
+ 
+ SELECT w.ID, avg(WeightPounds) AS avg_weight, AVG(steps) AS steps, AVG(calories) AS calories, AVG(distance) AS distance
+ FROM `bellabeat-364607.data.weight` AS w
+ JOIN `bellabeat-364607.data.ID_avg` AS I
+ ON w.ID = I.Id
+ GROUP BY w.Id
+ ORDER BY avg_weight DESC
+  LIMIT 1000;
+  
+ #Finding hourly Averages for calories, stpeps, and intensity.
+ 
+ SELECT c.Time, AVG(Calories) AS avg_cal, AVG(StepTotal) AS avg_steps, AVG(TotalIntensity) AS avg_intensity
+ FROM `bellabeat-364607.data.hourly_calories` AS c
+ JOIN `bellabeat-364607.data.hourly_steps` AS s
+ ON c.Id =s.id AND c.Date = s.Date AND c.Time = s.Time
+ JOIN `bellabeat-364607.data.hourly_intensities` AS i
+ ON  c.Id =i.id AND c.Date = i.Date AND c.Time = i.Time
+ GROUP BY c.Time
+ ORDER BY c.Time
+ LIMIT 1000;
+ 
+ #Find the most days where subjects were most active during the test;
+ 
+ SELECT *
+ FROM `bellabeat-364607.data.daily_avg` 
+ WHERE Calories >2400 AND steps > 9000 
+ ORDER BY Calories DESC
+ 
+  
+  
